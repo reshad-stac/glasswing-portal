@@ -11,14 +11,16 @@ export default function Index() {
     <div className="min-h-screen relative overflow-hidden">
       <StarField />
       <Navigation />
+      
+      {/* Fixed 3D Scene - visible throughout entire page */}
+      <div className="fixed inset-0 flex items-center justify-center opacity-30 pointer-events-none z-0">
+        <Scene3D />
+      </div>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center pt-20">
-        <div className="absolute inset-0 flex items-center justify-center opacity-40">
-          <Scene3D />
-        </div>
+      <section className="relative min-h-screen flex items-center justify-center pt-20 z-10">
 
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container mx-auto px-4 relative z-20">
           <div className="max-w-4xl mx-auto text-center space-y-8 animate-fade-in">
             <h1 className="text-5xl md:text-7xl font-bold gradient-text leading-tight">
               Development Wing
@@ -49,7 +51,7 @@ export default function Index() {
       </section>
 
       {/* Stats Section */}
-      <section className="relative py-20 px-4">
+      <section className="relative py-20 px-4 z-10">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             <StatCard value="50+" label="Active Members" delay={100} />
@@ -60,7 +62,7 @@ export default function Index() {
       </section>
 
       {/* Features Section */}
-      <section className="relative py-20 px-4">
+      <section className="relative py-20 px-4 z-10">
         <div className="container mx-auto max-w-6xl">
           <h2 className="text-4xl md:text-5xl font-bold gradient-text text-center mb-16">
             What We Offer
