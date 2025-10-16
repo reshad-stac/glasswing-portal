@@ -16,9 +16,13 @@ function AnimatedIcosahedron() {
   const meshRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
+    const time = state.clock.getElapsedTime();
     if (meshRef.current) {
-      meshRef.current.rotation.x = state.clock.getElapsedTime() * 0.2;
-      meshRef.current.rotation.y = state.clock.getElapsedTime() * 0.3;
+      meshRef.current.rotation.x = time * 0.2;
+      meshRef.current.rotation.y = time * 0.3;
+
+      const scale = 1 + time * 0.1;
+      meshRef.current.scale.set(scale, scale, scale);
     }
   });
 
@@ -139,7 +143,6 @@ function CodeParticles() {
 
 function CoreExplosion() {
   const coreRef = useRef<THREE.Mesh>(null);
-  const ringsRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
     const time = state.clock.getElapsedTime();
@@ -148,21 +151,6 @@ function CoreExplosion() {
     if (coreRef.current) {
       const scale = 1 + Math.sin(time * 2) * 0.2;
       coreRef.current.scale.setScalar(scale);
-    }
-    
-    // Expanding rings
-    if (ringsRef.current) {
-      ringsRef.current.children.forEach((ring, i) => {
-        const offset = i * 0.5;
-        const ringScale = ((time + offset) % 3) * 2;
-        const opacity = Math.max(0, 1 - ringScale / 6);
-        
-        ring.scale.setScalar(ringScale);
-        
-        if (ring instanceof THREE.Mesh && ring.material instanceof THREE.MeshBasicMaterial) {
-          ring.material.opacity = opacity;
-        }
-      });
     }
   });
 
@@ -174,21 +162,6 @@ function CoreExplosion() {
         <meshBasicMaterial color="#ffffff" />
         <pointLight intensity={2} distance={10} decay={2} color="#00d4ff" />
       </mesh>
-      
-      {/* Expanding rings */}
-      <group ref={ringsRef}>
-        {[0, 1, 2].map((i) => (
-          <mesh key={i}>
-            <torusGeometry args={[1, 0.05, 16, 100]} />
-            <meshBasicMaterial
-              color="#b844ff"
-              transparent
-              opacity={1}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-        ))}
-      </group>
     </>
   );
 }

@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import About from "./pages/About";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
+import TargetCursor from "./components/TargetCursor";
 
 const queryClient = new QueryClient();
 
@@ -15,6 +16,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <TargetCursor spinDuration={2} hideDefaultCursor={true} />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />

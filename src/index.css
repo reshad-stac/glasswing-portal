@@ -9,8 +9,8 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Dark cosmic theme */
-    --background: 240 10% 5%;
-    --foreground: 210 40% 98%;
+    --background: 240 10% 3%;
+    --foreground: 210 40% 100%;
 
     /* Glass cards */
     --card: 240 10% 8%;
@@ -20,7 +20,7 @@ All colors MUST be HSL.
     --popover-foreground: 210 40% 98%;
 
     /* Neon blue primary */
-    --primary: 210 100% 60%;
+    --primary: 210 100% 70%;
     --primary-foreground: 0 0% 100%;
 
     /* Glass secondary */
@@ -31,7 +31,7 @@ All colors MUST be HSL.
     --muted-foreground: 215 20% 65%;
 
     /* Purple accent */
-    --accent: 280 80% 65%;
+    --accent: 280 90% 70%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -40,18 +40,18 @@ All colors MUST be HSL.
     /* Glass borders */
     --border: 240 20% 25%;
     --input: 240 20% 20%;
-    --ring: 210 100% 60%;
+    --ring: 210 100% 70%;
 
     --radius: 1rem;
 
     /* Gradient colors */
-    --gradient-start: 210 100% 60%;
-    --gradient-mid: 280 80% 65%;
+    --gradient-start: 210 100% 70%;
+    --gradient-mid: 280 90% 70%;
     --gradient-end: 330 80% 65%;
 
     /* Glow effects */
-    --glow-primary: 210 100% 60%;
-    --glow-accent: 280 80% 65%;
+    --glow-primary: 210 100% 70%;
+    --glow-accent: 280 90% 70%;
   }
 }
 

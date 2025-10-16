@@ -7,7 +7,7 @@ interface StatCardProps {
 export default function StatCard({ value, label, delay = 0 }: StatCardProps) {
   return (
     <div
-      className="glass-card p-6 text-center animate-fade-in"
+      className="glass-card p-6 text-center animate-fade-in cursor-target"
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="text-4xl md:text-5xl font-bold gradient-text mb-2 animate-glow">
