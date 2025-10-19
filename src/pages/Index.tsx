@@ -7,6 +7,7 @@ import Navigation from '@/components/Navigation';
 import SplitText from '@/components/SplitTextProps';
 import DecryptedText from '@/components/SplitTextProps';
 import Threads from '@/components/Threads'
+import MembersHierarchy from '@/components/MembersHierarchy';
 import { ArrowRight, Users, Code, Rocket } from 'lucide-react';
 
 export default function Index() {
@@ -117,6 +118,9 @@ export default function Index() {
           </div>
         </div>
       </section>
+
+      {/* Members Hierarchy Section */}
+      <MembersHierarchy />
     </div>
   );
 }
