@@ -26,7 +26,9 @@ export default function MembersHierarchy() {
   const containerRef = useRef<HTMLDivElement>(null);
   const circlesRef = useRef<(HTMLDivElement | null)[]>([]);
   const linesRef = useRef<(SVGLineElement | null)[]>([]);
+  const expandedCirclesRef = useRef<(HTMLDivElement | null)[]>([]);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -87,19 +89,51 @@ export default function MembersHierarchy() {
     };
   }, []);
 
-  const handleCircleHover = (index: number, isHovering: boolean) => {
+  const handleCircleHover = (index: number, isHovering: boolean, hasMultiple: boolean) => {
     const circle = circlesRef.current[index];
     if (!circle) return;
 
     setHoveredIndex(isHovering ? index : null);
 
+    if (hasMultiple && isHovering) {
+      setExpandedIndex(index);
+    } else if (!isHovering) {
+      setExpandedIndex(null);
+    }
+
     gsap.to(circle, {
-      scale: isHovering ? 1.15 : 1,
-      y: isHovering ? -8 : 0,
+      scale: isHovering && !hasMultiple ? 1.15 : 1,
+      y: isHovering && !hasMultiple ? -8 : 0,
       duration: 0.3,
       ease: 'power2.out',
     });
   };
+
+  useEffect(() => {
+    if (expandedIndex !== null) {
+      const member = hierarchyData[expandedIndex];
+      if (member && member.count > 1) {
+        expandedCirclesRef.current.forEach((circle, idx) => {
+          if (!circle) return;
+          
+          gsap.fromTo(
+            circle,
+            {
+              opacity: 0,
+              scale: 0,
+            },
+            {
+              opacity: 1,
+              scale: 1,
+              duration: 0.4,
+              ease: 'back.out(2)',
+              delay: idx * 0.05,
+            }
+          );
+        });
+      }
+    }
+  }, [expandedIndex]);
 
   return (
     <section ref={containerRef} className="relative py-20 px-4 z-10">
@@ -154,8 +188,8 @@ export default function MembersHierarchy() {
           <div
             ref={(el) => (circlesRef.current[0] = el)}
             className="absolute top-[5%] left-1/2 -translate-x-1/2 cursor-pointer group"
-            onMouseEnter={() => handleCircleHover(0, true)}
-            onMouseLeave={() => handleCircleHover(0, false)}
+            onMouseEnter={() => handleCircleHover(0, true, false)}
+            onMouseLeave={() => handleCircleHover(0, false, false)}
           >
             <div className="relative">
               <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/90 to-accent/90 border-4 border-background shadow-2xl flex items-center justify-center overflow-hidden backdrop-blur-sm">
@@ -182,8 +216,8 @@ export default function MembersHierarchy() {
                 ref={(el) => (circlesRef.current[idx + 1] = el)}
                 className="absolute top-[25%] cursor-pointer group"
                 style={{ left: `${positions[idx]}%`, transform: 'translateX(-50%)' }}
-                onMouseEnter={() => handleCircleHover(idx + 1, true)}
-                onMouseLeave={() => handleCircleHover(idx + 1, false)}
+                onMouseEnter={() => handleCircleHover(idx + 1, true, false)}
+                onMouseLeave={() => handleCircleHover(idx + 1, false, false)}
               >
                 <div className="relative">
                   <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/80 to-accent/80 border-4 border-background shadow-xl flex items-center justify-center overflow-hidden backdrop-blur-sm">
@@ -206,32 +240,79 @@ export default function MembersHierarchy() {
           {/* Level 2: Executives */}
           {hierarchyData.slice(4, 7).map((member, idx) => {
             const positions = [20, 50, 80];
+            const isExpanded = expandedIndex === idx + 4;
+            
             return (
               <div
                 key={idx}
                 ref={(el) => (circlesRef.current[idx + 4] = el)}
                 className="absolute top-[75%] cursor-pointer group"
                 style={{ left: `${positions[idx]}%`, transform: 'translateX(-50%)' }}
-                onMouseEnter={() => handleCircleHover(idx + 4, true)}
-                onMouseLeave={() => handleCircleHover(idx + 4, false)}
+                onMouseEnter={() => handleCircleHover(idx + 4, true, member.count > 1)}
+                onMouseLeave={() => handleCircleHover(idx + 4, false, member.count > 1)}
               >
                 <div className="relative">
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-accent/80 to-primary/80 border-4 border-background shadow-xl flex items-center justify-center overflow-hidden backdrop-blur-sm">
+                  {/* Main circle */}
+                  <div className={`w-20 h-20 rounded-full bg-gradient-to-br from-accent/80 to-primary/80 border-4 border-background shadow-xl flex items-center justify-center overflow-hidden backdrop-blur-sm transition-all duration-300 ${isExpanded ? 'scale-110' : ''}`}>
                     <User className="w-10 h-10 text-background" strokeWidth={2.5} />
                   </div>
+                  
                   {/* Count badge */}
-                  {member.count > 1 && (
+                  {member.count > 1 && !isExpanded && (
                     <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-primary border-2 border-background flex items-center justify-center shadow-lg">
                       <span className="text-background font-bold text-xs">{member.count}</span>
                     </div>
                   )}
+                  
                   {/* Glow effect */}
                   <div className="absolute inset-0 rounded-full bg-accent/30 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+                  
                   {/* Label on hover */}
-                  {hoveredIndex === idx + 4 && (
-                    <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 whitespace-nowrap bg-background/95 backdrop-blur-sm px-3 py-2 rounded-lg border border-accent/20 shadow-lg">
+                  {hoveredIndex === idx + 4 && !isExpanded && (
+                    <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 whitespace-nowrap bg-background/95 backdrop-blur-sm px-3 py-2 rounded-lg border border-accent/20 shadow-lg z-50">
                       <p className="text-sm font-bold text-foreground">{member.position}</p>
                       <p className="text-xs text-muted-foreground">{member.count} Positions</p>
+                    </div>
+                  )}
+
+                  {/* Expanded individual members */}
+                  {isExpanded && member.count > 1 && (
+                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                      {Array.from({ length: member.count }).map((_, memberIdx) => {
+                        const angle = (memberIdx / member.count) * Math.PI * 2 - Math.PI / 2;
+                        const radius = 80;
+                        const x = Math.cos(angle) * radius;
+                        const y = Math.sin(angle) * radius;
+                        
+                        return (
+                          <div
+                            key={memberIdx}
+                            ref={(el) => (expandedCirclesRef.current[memberIdx] = el)}
+                            className="absolute"
+                            style={{
+                              left: `${x}px`,
+                              top: `${y}px`,
+                              transform: 'translate(-50%, -50%)',
+                            }}
+                          >
+                            <div className="relative group/member">
+                              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-accent/90 to-primary/90 border-3 border-background shadow-lg flex items-center justify-center overflow-hidden backdrop-blur-sm hover:scale-110 transition-transform duration-200">
+                                <User className="w-8 h-8 text-background" strokeWidth={2.5} />
+                              </div>
+                              {/* Individual member glow */}
+                              <div className="absolute inset-0 rounded-full bg-accent/40 blur-md opacity-0 group-hover/member:opacity-100 transition-opacity duration-200 -z-10" />
+                              {/* Member number */}
+                              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-primary border border-background flex items-center justify-center shadow-sm">
+                                <span className="text-background font-bold text-[10px]">{memberIdx + 1}</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {/* Center label */}
+                      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background/95 backdrop-blur-sm px-4 py-2 rounded-lg border border-accent/30 shadow-xl pointer-events-none">
+                        <p className="text-xs font-bold text-foreground whitespace-nowrap">{member.position}</p>
+                      </div>
                     </div>
                   )}
                 </div>
