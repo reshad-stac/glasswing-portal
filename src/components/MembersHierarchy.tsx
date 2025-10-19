@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Users } from 'lucide-react';
+import { User } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,37 +24,38 @@ const hierarchyData: Member[] = [
 
 export default function MembersHierarchy() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const circlesRef = useRef<(HTMLDivElement | null)[]>([]);
   const linesRef = useRef<(SVGLineElement | null)[]>([]);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const cards = cardsRef.current.filter(Boolean);
+    const circles = circlesRef.current.filter(Boolean);
     const lines = linesRef.current.filter(Boolean);
     
-    // Animate cards on scroll
-    cards.forEach((card, index) => {
+    // Animate circles on scroll
+    circles.forEach((circle, index) => {
       gsap.fromTo(
-        card,
+        circle,
         {
           opacity: 0,
-          y: 100,
-          scale: 0.8,
+          scale: 0,
+          y: -50,
         },
         {
           opacity: 1,
-          y: 0,
           scale: 1,
-          duration: 0.8,
-          ease: 'power3.out',
+          y: 0,
+          duration: 0.6,
+          ease: 'back.out(1.7)',
           scrollTrigger: {
             trigger: containerRef.current,
             start: 'top 60%',
             end: 'top 30%',
             toggleActions: 'play none none reverse',
           },
-          delay: index * 0.15,
+          delay: index * 0.1,
         }
       );
     });
@@ -68,7 +69,7 @@ export default function MembersHierarchy() {
         },
         {
           strokeDashoffset: 0,
-          duration: 1,
+          duration: 0.8,
           ease: 'power2.out',
           scrollTrigger: {
             trigger: containerRef.current,
@@ -76,7 +77,7 @@ export default function MembersHierarchy() {
             end: 'top 30%',
             toggleActions: 'play none none reverse',
           },
-          delay: index * 0.1 + 0.3,
+          delay: index * 0.08,
         }
       );
     });
@@ -86,13 +87,15 @@ export default function MembersHierarchy() {
     };
   }, []);
 
-  const handleCardHover = (index: number, isHovering: boolean) => {
-    const card = cardsRef.current[index];
-    if (!card) return;
+  const handleCircleHover = (index: number, isHovering: boolean) => {
+    const circle = circlesRef.current[index];
+    if (!circle) return;
 
-    gsap.to(card, {
-      scale: isHovering ? 1.1 : 1,
-      y: isHovering ? -10 : 0,
+    setHoveredIndex(isHovering ? index : null);
+
+    gsap.to(circle, {
+      scale: isHovering ? 1.15 : 1,
+      y: isHovering ? -8 : 0,
       duration: 0.3,
       ease: 'power2.out',
     });
@@ -108,127 +111,137 @@ export default function MembersHierarchy() {
           Meet the talented individuals who drive innovation and excellence in the Development Wing
         </p>
 
-        {/* 3D Isometric Tree Container */}
-        <div 
-          className="relative min-h-[800px] flex items-center justify-center"
-          style={{
-            perspective: '2000px',
-            transformStyle: 'preserve-3d',
-          }}
-        >
+        {/* Tree Structure Container */}
+        <div className="relative min-h-[700px] flex items-center justify-center">
           {/* SVG for connection lines */}
           <svg 
             className="absolute inset-0 w-full h-full pointer-events-none z-0"
             style={{ overflow: 'visible' }}
           >
             <defs>
-              <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.3" />
-                <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity="0.3" />
+              <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.6" />
+                <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity="0.6" />
               </linearGradient>
             </defs>
             
-            {/* Lines from Secretary to Deputies */}
-            <line ref={el => linesRef.current[0] = el} x1="50%" y1="15%" x2="20%" y2="40%" stroke="url(#lineGradient)" strokeWidth="2" strokeDasharray="10,5" />
-            <line ref={el => linesRef.current[1] = el} x1="50%" y1="15%" x2="50%" y2="40%" stroke="url(#lineGradient)" strokeWidth="2" strokeDasharray="10,5" />
-            <line ref={el => linesRef.current[2] = el} x1="50%" y1="15%" x2="80%" y2="40%" stroke="url(#lineGradient)" strokeWidth="2" strokeDasharray="10,5" />
+            {/* Vertical line from Secretary */}
+            <line ref={el => linesRef.current[0] = el} x1="50%" y1="12%" x2="50%" y2="32%" stroke="url(#lineGradient)" strokeWidth="3" strokeDasharray="1000" />
             
-            {/* Lines from Deputies to Executives */}
-            <line ref={el => linesRef.current[3] = el} x1="20%" y1="50%" x2="20%" y2="75%" stroke="url(#lineGradient)" strokeWidth="2" strokeDasharray="10,5" />
-            <line ref={el => linesRef.current[4] = el} x1="50%" y1="50%" x2="50%" y2="75%" stroke="url(#lineGradient)" strokeWidth="2" strokeDasharray="10,5" />
-            <line ref={el => linesRef.current[5] = el} x1="80%" y1="50%" x2="80%" y2="75%" stroke="url(#lineGradient)" strokeWidth="2" strokeDasharray="10,5" />
+            {/* Horizontal line connecting Deputies */}
+            <line ref={el => linesRef.current[1] = el} x1="25%" y1="40%" x2="75%" y2="40%" stroke="url(#lineGradient)" strokeWidth="3" strokeDasharray="1000" />
+            
+            {/* Lines from Deputies to horizontal bar */}
+            <line ref={el => linesRef.current[2] = el} x1="25%" y1="32%" x2="25%" y2="40%" stroke="url(#lineGradient)" strokeWidth="3" strokeDasharray="1000" />
+            <line ref={el => linesRef.current[3] = el} x1="50%" y1="32%" x2="50%" y2="40%" stroke="url(#lineGradient)" strokeWidth="3" strokeDasharray="1000" />
+            <line ref={el => linesRef.current[4] = el} x1="75%" y1="32%" x2="75%" y2="40%" stroke="url(#lineGradient)" strokeWidth="3" strokeDasharray="1000" />
+            
+            {/* Horizontal line connecting Executives */}
+            <line ref={el => linesRef.current[5] = el} x1="20%" y1="68%" x2="80%" y2="68%" stroke="url(#lineGradient)" strokeWidth="3" strokeDasharray="1000" />
+            
+            {/* Lines from horizontal bar to Executives */}
+            <line ref={el => linesRef.current[6] = el} x1="20%" y1="48%" x2="20%" y2="68%" stroke="url(#lineGradient)" strokeWidth="3" strokeDasharray="1000" />
+            <line ref={el => linesRef.current[7] = el} x1="50%" y1="48%" x2="50%" y2="68%" stroke="url(#lineGradient)" strokeWidth="3" strokeDasharray="1000" />
+            <line ref={el => linesRef.current[8] = el} x1="80%" y1="48%" x2="80%" y2="68%" stroke="url(#lineGradient)" strokeWidth="3" strokeDasharray="1000" />
+            
+            {/* Lines down to Executive circles */}
+            <line ref={el => linesRef.current[9] = el} x1="20%" y1="68%" x2="20%" y2="78%" stroke="url(#lineGradient)" strokeWidth="3" strokeDasharray="1000" />
+            <line ref={el => linesRef.current[10] = el} x1="50%" y1="68%" x2="50%" y2="78%" stroke="url(#lineGradient)" strokeWidth="3" strokeDasharray="1000" />
+            <line ref={el => linesRef.current[11] = el} x1="80%" y1="68%" x2="80%" y2="78%" stroke="url(#lineGradient)" strokeWidth="3" strokeDasharray="1000" />
           </svg>
 
           {/* Level 0: Secretary */}
           <div
-            ref={(el) => (cardsRef.current[0] = el)}
-            className="absolute top-[5%] left-1/2 -translate-x-1/2 glass-card p-6 cursor-pointer group w-64"
-            style={{
-              transformStyle: 'preserve-3d',
-              transform: 'rotateX(15deg) rotateY(-5deg) translateZ(100px)',
-            }}
-            onMouseEnter={() => handleCardHover(0, true)}
-            onMouseLeave={() => handleCardHover(0, false)}
+            ref={(el) => (circlesRef.current[0] = el)}
+            className="absolute top-[5%] left-1/2 -translate-x-1/2 cursor-pointer group"
+            onMouseEnter={() => handleCircleHover(0, true)}
+            onMouseLeave={() => handleCircleHover(0, false)}
           >
-            <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/30 via-accent/30 to-primary/30 blur-xl" />
-            </div>
-            <div className="relative z-10">
-              <div className="w-20 h-20 mx-auto mb-3 rounded-full bg-gradient-to-br from-primary/40 to-accent/40 border-2 border-primary/60 flex items-center justify-center">
-                <Users className="w-10 h-10 text-primary" />
+            <div className="relative">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/90 to-accent/90 border-4 border-background shadow-2xl flex items-center justify-center overflow-hidden backdrop-blur-sm">
+                <User className="w-12 h-12 text-background" strokeWidth={2.5} />
               </div>
-              <h3 className="text-xl font-bold text-center text-foreground mb-1">Secretary</h3>
-              <p className="text-muted-foreground text-center text-sm">1 Position</p>
-              <div className="mt-3 h-1 w-12 mx-auto rounded-full bg-gradient-to-r from-primary to-accent" />
+              {/* Glow effect */}
+              <div className="absolute inset-0 rounded-full bg-primary/40 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+              {/* Label on hover */}
+              {hoveredIndex === 0 && (
+                <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 whitespace-nowrap bg-background/95 backdrop-blur-sm px-4 py-2 rounded-lg border border-primary/20 shadow-lg">
+                  <p className="text-sm font-bold text-foreground">Secretary</p>
+                  <p className="text-xs text-muted-foreground">1 Position</p>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Level 1: Deputies */}
-          {hierarchyData.slice(1, 4).map((member, idx) => (
-            <div
-              key={idx}
-              ref={(el) => (cardsRef.current[idx + 1] = el)}
-              className="absolute top-[35%] glass-card p-6 cursor-pointer group w-56"
-              style={{
-                transformStyle: 'preserve-3d',
-                transform: `rotateX(10deg) rotateY(${idx === 0 ? '-10deg' : idx === 2 ? '10deg' : '0deg'}) translateZ(${80 - idx * 10}px)`,
-                left: `${20 + idx * 30}%`,
-                marginLeft: '-7rem',
-              }}
-              onMouseEnter={() => handleCardHover(idx + 1, true)}
-              onMouseLeave={() => handleCardHover(idx + 1, false)}
-            >
-              <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 blur-xl" />
-              </div>
-              <div className="relative z-10">
-                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 border-2 border-primary/50 flex items-center justify-center">
-                  <Users className="w-8 h-8 text-primary" />
+          {hierarchyData.slice(1, 4).map((member, idx) => {
+            const positions = [25, 50, 75];
+            return (
+              <div
+                key={idx}
+                ref={(el) => (circlesRef.current[idx + 1] = el)}
+                className="absolute top-[25%] cursor-pointer group"
+                style={{ left: `${positions[idx]}%`, transform: 'translateX(-50%)' }}
+                onMouseEnter={() => handleCircleHover(idx + 1, true)}
+                onMouseLeave={() => handleCircleHover(idx + 1, false)}
+              >
+                <div className="relative">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/80 to-accent/80 border-4 border-background shadow-xl flex items-center justify-center overflow-hidden backdrop-blur-sm">
+                    <User className="w-10 h-10 text-background" strokeWidth={2.5} />
+                  </div>
+                  {/* Glow effect */}
+                  <div className="absolute inset-0 rounded-full bg-primary/30 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+                  {/* Label on hover */}
+                  {hoveredIndex === idx + 1 && (
+                    <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 whitespace-nowrap bg-background/95 backdrop-blur-sm px-3 py-2 rounded-lg border border-primary/20 shadow-lg">
+                      <p className="text-sm font-bold text-foreground">{member.position}</p>
+                      <p className="text-xs text-muted-foreground">1 Position</p>
+                    </div>
+                  )}
                 </div>
-                <h3 className="text-lg font-bold text-center text-foreground mb-1">{member.position}</h3>
-                <p className="text-muted-foreground text-center text-sm">1 Position</p>
-                <div className="mt-3 h-0.5 w-10 mx-auto rounded-full bg-gradient-to-r from-primary to-accent opacity-70" />
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {/* Level 2: Executives */}
-          {hierarchyData.slice(4, 7).map((member, idx) => (
-            <div
-              key={idx}
-              ref={(el) => (cardsRef.current[idx + 4] = el)}
-              className="absolute top-[65%] glass-card p-6 cursor-pointer group w-52"
-              style={{
-                transformStyle: 'preserve-3d',
-                transform: `rotateX(5deg) rotateY(${idx === 0 ? '-8deg' : idx === 2 ? '8deg' : '0deg'}) translateZ(${60 - idx * 10}px)`,
-                left: `${20 + idx * 30}%`,
-                marginLeft: '-6.5rem',
-              }}
-              onMouseEnter={() => handleCardHover(idx + 4, true)}
-              onMouseLeave={() => handleCardHover(idx + 4, false)}
-            >
-              <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="absolute inset-0 bg-gradient-to-r from-accent/20 via-primary/20 to-accent/20 blur-xl" />
-              </div>
-              <div className="relative z-10">
-                {member.count > 1 && (
-                  <div className="absolute -top-2 -right-2 w-10 h-10 rounded-full bg-primary/20 backdrop-blur-sm border border-primary/30 flex items-center justify-center">
-                    <span className="text-primary font-bold text-sm">{member.count}</span>
+          {hierarchyData.slice(4, 7).map((member, idx) => {
+            const positions = [20, 50, 80];
+            return (
+              <div
+                key={idx}
+                ref={(el) => (circlesRef.current[idx + 4] = el)}
+                className="absolute top-[75%] cursor-pointer group"
+                style={{ left: `${positions[idx]}%`, transform: 'translateX(-50%)' }}
+                onMouseEnter={() => handleCircleHover(idx + 4, true)}
+                onMouseLeave={() => handleCircleHover(idx + 4, false)}
+              >
+                <div className="relative">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-accent/80 to-primary/80 border-4 border-background shadow-xl flex items-center justify-center overflow-hidden backdrop-blur-sm">
+                    <User className="w-10 h-10 text-background" strokeWidth={2.5} />
                   </div>
-                )}
-                <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-gradient-to-br from-accent/30 to-primary/30 border-2 border-accent/50 flex items-center justify-center">
-                  <Users className="w-7 h-7 text-accent" />
+                  {/* Count badge */}
+                  {member.count > 1 && (
+                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-primary border-2 border-background flex items-center justify-center shadow-lg">
+                      <span className="text-background font-bold text-xs">{member.count}</span>
+                    </div>
+                  )}
+                  {/* Glow effect */}
+                  <div className="absolute inset-0 rounded-full bg-accent/30 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+                  {/* Label on hover */}
+                  {hoveredIndex === idx + 4 && (
+                    <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 whitespace-nowrap bg-background/95 backdrop-blur-sm px-3 py-2 rounded-lg border border-accent/20 shadow-lg">
+                      <p className="text-sm font-bold text-foreground">{member.position}</p>
+                      <p className="text-xs text-muted-foreground">{member.count} Positions</p>
+                    </div>
+                  )}
                 </div>
-                <h3 className="text-base font-bold text-center text-foreground mb-1">{member.position}</h3>
-                <p className="text-muted-foreground text-center text-xs">{member.count} Positions</p>
-                <div className="mt-2 h-0.5 w-8 mx-auto rounded-full bg-gradient-to-r from-accent to-primary opacity-60" />
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Stats summary */}
-        <div className="mt-16 glass-card p-8 text-center max-w-md mx-auto">
+        <div className="mt-24 glass-card p-8 text-center max-w-md mx-auto">
           <h3 className="text-2xl font-bold text-foreground mb-4">Total Positions</h3>
           <div className="text-6xl font-bold gradient-text">
             {hierarchyData.reduce((sum, member) => sum + member.count, 0)}
